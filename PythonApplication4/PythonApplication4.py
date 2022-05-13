@@ -408,3 +408,79 @@ class Solution:
     print(a)
 '''
 
+'''
+leetcode 2203 得到要求路径的最小带权子图
+
+from collections import defaultdict
+class Solution:
+    def minimumWeight(self, n: int, edges: list[list[int]], src1: int, src2: int, dest: int) -> int:
+        pointdict = defaultdict(list)
+        for i in edges:
+            pointdict[i[0]].append([i[1],i[2]])
+        pointdict1 = defaultdict(list)
+        for i in edges:
+            pointdict1[i[1]].append([i[0],i[2]])
+        def search_allpath(pointdict,point_1):
+            newpoint = [[point_1,0]]
+            passpointdict = [10000000000]*n
+            passpointdict[point_1] = 0
+            while newpoint:
+                pointlist = []
+                for i in newpoint:
+                    if i[1] > passpointdict[i[0]]:
+                        continue
+                    for j in pointdict[i[0]]:
+                        temp = i[1]+j[1]
+                        if passpointdict[j[0]] == 0 or passpointdict[j[0]] > temp:
+                            passpointdict[j[0]] = temp
+                            pointlist.append([j[0],temp])
+                newpoint = pointlist
+            passpointdict[point_1] = 0
+            return passpointdict
+        a = search_allpath(pointdict,src1)
+        b = search_allpath(pointdict,src2)
+        c = search_allpath(pointdict1,dest)
+        ans = min(sum(d) for d in zip(a, b, c))
+        return ans if ans < 10000000000 else -1
+    a = minimumWeight(0,6,[[0,2,2],[0,5,6],[1,0,3],[1,4,5],[2,1,1],[2,3,3],[2,3,4],[3,4,2],[4,5,1]],0,1,5)
+    print(a)
+
+'''
+
+'''
+leetcode 2209 用地毯覆盖过后的最少白色砖块
+
+class Solution:
+    def minimumWhiteTiles(self, floor: str, numCarpets: int, carpetLen: int) -> int:
+        DP = {}
+        index = 0
+        for i in range(carpetLen):
+            if floor[i] == '1':
+                index += 1
+            DP[(i,0)] = index
+            DP[(i,1)] = 0
+        def dp(lenth,m):
+            nonlocal DP
+            if (lenth,m) in DP:
+                return DP[(lenth,m)]
+            if m*carpetLen >= lenth+1:
+                DP[(lenth,m)] = 0
+                return 0
+            if m == 0:
+                index = 0
+                for i in floor[0:lenth+1]:
+                    if i == '1':
+                        index += 1
+                DP[(lenth,m)] = index
+                return index
+            else:
+                if floor[lenth] == '0':
+                    DP[(lenth,m)] = dp(lenth-1,m)
+                    return DP[(lenth,m)]
+                else:
+                    DP[(lenth,m)] = min(dp(lenth-1,m)+(floor[lenth]=="1"),dp(lenth-carpetLen,m-1))
+                    return DP[(lenth,m)]
+        return dp(len(floor)-1,numCarpets)
+    a = minimumWhiteTiles(0,"0001100111110001111111110111010110100111000111111001011011010000011011101100001011111111111111111011110101111011010101001011111111111111111011110101000101010010101111111011011111111101100111111101101111000011101101001110011011100010100111111111111111101011001111101110101110111001111111111110110111111101011110111000111011011010111011111111111111111011111011011111111110001110001100111001101101011111111111111111101011011111101101100111111111111111",8,16)
+    print(a)
+'''
