@@ -1,4 +1,35 @@
 ﻿'''
+技巧稳固  快速排序实现
+
+def quick_sort(lists,key = lambda x:x,reverse = False):
+    if len(lists) <= 1:
+        return lists
+    start = 0
+    end = len(lists)-1
+    temp = lists[start]
+    while start < end:
+        while key(lists[end]) >= temp and end>start:
+            end -= 1
+        lists[start] = lists[end]
+        while temp >= key(lists[start]) and end>start:
+            start += 1
+        lists[end] = lists[start]
+    lists1 = quick_sort(lists[0:start],key,reverse)
+    lists2 = quick_sort(lists[start+1:],key,reverse)
+    lists = lists1 + [temp] + lists2
+    if reverse == True:
+        lists = reversed(lists)
+    return lists
+a= quick_sort([5,3,6,3,8,13,4,31,4,5])
+print(a)
+'''
+
+'''
+leetcode 4 寻找两个正序数组的中位数
+'''
+
+
+'''
 leetcode 2257 未被守卫的格子数
 from collections import defaultdict
 def countUnguarded(m, n, guards, walls):
@@ -84,11 +115,7 @@ class Solution:
         return anwser
     a = appealSum('abbca')
     print(a)
-
 '''
-
-
-
 
 
 '''
@@ -131,9 +158,7 @@ class Solution:
     a = countDistinct(0,[2,3,3,2,2],2,2)
     print(a)
 '''
-                    
-       
-
+                          
 
 '''
 leetcode 2227 加密解密字符串
@@ -481,6 +506,463 @@ class Solution:
                     DP[(lenth,m)] = min(dp(lenth-1,m)+(floor[lenth]=="1"),dp(lenth-carpetLen,m-1))
                     return DP[(lenth,m)]
         return dp(len(floor)-1,numCarpets)
-    a = minimumWhiteTiles(0,"0001100111110001111111110111010110100111000111111001011011010000011011101100001011111111111111111011110101111011010101001011111111111111111011110101000101010010101111111011011111111101100111111101101111000011101101001110011011100010100111111111111111101011001111101110101110111001111111111110110111111101011110111000111011011010111011111111111111111011111011011111111110001110001100111001101101011111111111111111101011011111101101100111111111111111",8,16)
+'''
+
+'''
+Leetcode 2122 还原原数组
+没解决
+from collections import defaultdict
+class Solution:
+    def recoverArray(self, nums: list[int]) -> list[int]:
+        nums.sort()
+        newnums = [nums[0]]
+        temp = nums[0]
+        for i in nums[1:]:
+            if i != temp:
+                newnums.append(i)
+                temp = i
+        numsdict = defaultdict(list)
+        for i in range(len(newnums)-1):
+            for j in range(i+1,len(newnums)):
+                numsdict[newnums[j]-newnums[i]].append([i,j])
+        for i in numsdict:
+            if len(numsdict[i]) == len(newnums)//2 and i%2 == 0:
+                anwsernums = i
+                break
+        allnumber = []
+        for i in numsdict[anwsernums]:
+            allnumber.append(i[0])
+        anwser = []
+        for i in allnumber:
+            for j in nums:
+                if j == nums[i]:
+                    anwser.append(j+anwsernums//2)
+        return anwser
+    a = recoverArray(0,[11,6,3,4,8,7,8,7,9,8,9,10,10,2,1,9])
     print(a)
 '''
+
+'''
+leetcode 5.14双周赛
+2270 分割数组的方案数
+class solution:
+    def waysToSplitArray(self, nums: list[int]) -> int:
+        start = nums[0]
+        end = 0
+        for i in nums:
+            end += i
+        end -= start
+        if len(nums) == 2:
+            if nums[1] <= nums[0]:
+                return 1
+            else:
+                return 0
+        anwser = 0
+        index = 1
+        for i in range(len(nums)-2):
+            if start >= end:
+                anwser += 1
+            start += nums[index]
+            end -= nums[index]
+            index += 1
+        return anwser
+    a = waysToSplitArray(0,[2,3,1,0])
+    print(a)
+'''
+
+'''
+Leetcode 2271 毯子覆盖最多的白色砖块数
+
+class Solution:
+    def maximumWhiteTiles(self, tiles: list[list[int]], carpetLen: int) -> int:
+        if carpetLen == 1:
+            return 1
+        lenth = len(tiles)
+        tiles.sort(key = lambda x : x[0])
+        nums = []
+        blank = []
+        for i in range(lenth-1):
+            nums.append(tiles[i][1]-tiles[i][0]+1)
+            blank.append(tiles[i+1][0]-tiles[i][1]-1)
+        nums.append(tiles[-1][1]-tiles[-1][0]+1)
+        blank.append(1e9)
+        def change(index,endindex,left,show):
+            number = 0
+            if index == 0:
+                lenth = 0
+                endindex = 0
+                lenth = carpetLen
+                while True:
+                    if lenth < nums[endindex]:
+                        left = nums[endindex] - lenth
+                        show = 1
+                        number += lenth
+                        break
+                    elif lenth == nums[endindex]:
+                        left = blank[endindex]
+                        number += lenth
+                        show = 0
+                        break
+                    else:
+                        lenth -= nums[endindex]
+                        number += nums[endindex]
+                        if lenth < blank[endindex]:
+                            left = blank[endindex] - lenth
+                            show = 0
+                            break
+                        elif lenth == blank[endindex]:
+                            left = nums[endindex+1]
+                            show = 1
+                            endindex += 1
+                            break
+                        else:
+                            lenth -= blank[endindex]
+                            endindex += 1
+                            show = 1
+            else:
+                lenth = tiles[index][0] - tiles[index-1][0]       
+                if show == 1:
+                    while True:
+                        if lenth < left:
+                            left -= lenth
+                            number += lenth
+                            break
+                        elif lenth == left:
+                            left = blank[endindex]
+                            number += lenth
+                            show = 0
+                            break
+                        else:
+                            lenth -= left
+                            number += left
+                            if lenth < blank[endindex]:
+                                left = blank[endindex] - lenth
+                                show = 0
+                                break
+                            elif lenth == blank[endindex]:
+                                endindex += 1
+                                left = nums[endindex]
+                                break
+                            else:
+                                lenth -= blank[endindex]
+                                endindex += 1
+                                left = nums[endindex]
+                else:
+                    while True:
+                        if lenth < left:
+                            left = left - lenth
+                            break
+                        elif lenth == left:
+                            endindex += 1
+                            left = nums[endindex]
+                            show = 1
+                            break
+                        else:
+                            endindex += 1
+                            lenth -= left
+                            if lenth < nums[endindex]:
+                                left = nums[endindex] - lenth
+                                show = 1
+                                number += lenth
+                                break
+                            elif lenth == nums[endindex]:
+                                left = blank[endindex]
+                                number += lenth
+                                break
+                            else:
+                                left = blank[endindex]
+                                lenth -= nums[endindex]
+                                number += nums[endindex]
+            index += 1
+            return index,endindex,left,show,number
+        index = 0
+        endindex = 0
+        left = 0
+        show = 0
+        number = 0
+        anwser = 0
+        allanwser = []
+        for i in range(lenth):
+            index,endindex,left,show,number = change(index,endindex,left,show)
+            if i == 0:
+                anwser = number
+            else:
+                anwser += number - nums[i-1]
+            allanwser.append(anwser)
+        allanwser.sort()
+        return allanwser[-1]
+'''
+
+'''
+Leetcode 2272 最大波动的子字符串
+
+from string import ascii_lowercase
+from math import inf
+class Solution:
+    def largestVariance(self, s: str) -> int:
+        ans = 0
+        for a in ascii_lowercase:
+            for b in ascii_lowercase:
+                if a == b:
+                    continue
+                f,g = 0,-inf
+                for i in s:
+                    if i == a:
+                        f += 1
+                        g += 1
+                    if i == b:
+                        f = f-1
+                        g = f
+                        if f < 0:
+                            f = 0
+                    if g > ans:
+                        ans = g
+        return ans
+'''
+
+'''
+leetcode 668 乘法表中第k小的数
+
+class Solution:
+    def findKthNumber(self, m: int, n: int, k: int) -> int:
+        if m > n:
+            temp = n
+            n = m
+            m = temp
+        def search(i):
+            anwser = 0
+            for j in range(1,m+1):
+                anwser += min(i//j,n)
+            return anwser
+        start = 1
+        end = m+1
+        while start < end:
+            temp = (start+end)//2
+            judge = search(temp*n)
+            if judge >k:
+                end = temp
+            elif judge == k:
+                return temp*n
+            else:
+                start = temp + 1
+        allnumber = []
+        for i in range(start,m+1):
+            for j in range((start-1)*n//i+1,start*n//i+1):
+                allnumber.append(j*i)
+        allnumber.sort()
+        return allnumber[k-1-search((start-1)*n)]
+    a = findKthNumber(0,9,9,81)
+    print(a)
+'''
+
+
+
+'''
+Leetcode 6066 统计区间中的整数数目
+
+class CountIntervals:
+
+    def __init__(self):
+        self.left = []
+        self.right = []
+        self.num = 0
+
+    def add(self, left: int, right: int) -> None:
+        leftindex = bisect.bisect_left(self.left,left)
+        rightindex = bisect.bisect_right(self.right,right)
+        leftindex2 = bisect.bisect_left(self.right,left)
+        rightindex2 = bisect.bisect_right(self.left,right)
+        if leftindex2 == len(self.left):
+            self.left.append(left)
+            self.right.append(right)
+            self.num += right -left + 1
+        elif rightindex2 == 0:
+            self.left.insert(0,left)
+            self.right.insert(0,right)
+            self.num += right -left + 1
+        elif leftindex == leftindex2:
+            if rightindex == rightindex2:
+                total = 0
+                leftdelete = []
+                rightdelete = []
+                for i in range(leftindex,rightindex):
+                    total += self.right[i]-self.left[i]+1 
+                    leftdelete.append(i)
+                    rightdelete.append(i)
+                change = right - left +1 -total
+                self.num += change
+                for i in range(rightindex-1,leftindex-1,-1):
+                    self.left.pop(i)
+                    self.right.pop(i)
+                self.left.insert(leftindex,left)
+                self.right.insert(leftindex,right)
+            else:
+                right = self.right[rightindex]
+                rightindex += 1
+                total = 0
+                leftdelete = []
+                rightdelete = []
+                for i in range(leftindex,rightindex):
+                    total += self.right[i]-self.left[i]+1 
+                    leftdelete.append(i)
+                    rightdelete.append(i)
+                change = right - left +1 -total
+                self.num += change
+                for i in range(rightindex-1,leftindex-1,-1):
+                    self.left.pop(i)
+                    self.right.pop(i)
+                self.left.insert(leftindex,left)
+                self.right.insert(leftindex,right)
+        else:
+            if rightindex == rightindex2:
+                left = self.left[leftindex2]
+                leftindex -= 1
+                total = 0
+                leftdelete = []
+                rightdelete = []
+                for i in range(leftindex,rightindex):
+                    total += self.right[i]-self.left[i]+1 
+                    leftdelete.append(i)
+                    rightdelete.append(i)
+                change = right - left +1 -total
+                self.num += change
+                for i in range(rightindex-1,leftindex-1,-1):
+                    self.left.pop(i)
+                    self.right.pop(i)
+                self.left.insert(leftindex,left)
+                self.right.insert(leftindex,right)
+            else:
+                left = self.left[leftindex2]
+                right = self.right[rightindex]
+                rightindex += 1
+                leftindex -= 1
+                total = 0
+                leftdelete = []
+                rightdelete = []
+                for i in range(leftindex,rightindex):
+                    total += self.right[i]-self.left[i]+1 
+                    leftdelete.append(i)
+                    rightdelete.append(i)
+                change = right - left +1 -total
+                self.num += change
+                for i in range(rightindex-1,leftindex-1,-1):
+                    self.left.pop(i)
+                    self.right.pop(i)
+                self.left.insert(leftindex,left)
+                self.right.insert(leftindex,right)
+
+    def count(self) -> int:
+        return self.num
+'''
+
+'''
+leetcdoe 巫师的总力量和
+
+import bisect
+class Solution:
+    def totalStrength(self, strength: list[int]) -> int:
+        minnum = []
+        power = []
+        for i in strength:
+            time = bisect.bisect_left(minnum,i)
+            if time == len(minnum):
+                minnum.append(i)
+                index = 0
+                for j in power:
+                    j[1] += j[2]*i
+                    j[0] += j[1]*minnum[index]
+                    index += 1
+                power.append([i*i,i,1])
+            else:
+                minnum.insert(time,i)
+                minnum = minnum[0:time+1]
+                index = 0
+                for j in power:
+                    j[1] += j[2]*i
+                    j[0] += j[1]*minnum[min(index,time)]
+                    index += 1
+                power.append([i*i,i,1])
+                temppower =[0,0,0]
+                for j in range(time,len(power)):
+                    temppower[0] += j[0]
+                    temppower[1] += j[1]
+                    temppower[2] += j[2]
+                power.insert(time,temppower)
+                power = power[0:time+1]
+            anwser = 0
+            for  i in power:
+                anwser += i[0]
+        return anwser
+'''
+
+'''
+leetcode 675 为高尔夫比赛砍树
+'''
+from collections import defaultdict
+class Solution:
+    def cutOffTree(self, forest: list[list[int]]) -> int:
+        numberdict = {}
+        trees = []
+        pointdict = defaultdict(int)
+        for i in range(len(forest)):
+            for j in range(len(forest[0])):
+                if forest[i][j] > 1:
+                    trees.append(forest[i][j])
+                    numberdict[forest[i][j]] = (i,j)
+                    pointdict[(i,j)] = 1
+                elif forest[i][j] == 1:
+                    pointdict[(i,j)] = 1
+        def judge(start,end,pointdict):
+            if start == end:
+                return 0
+            time = 0
+            newpoint = []
+            startpoint = [start]
+            pointdict[start] = 0
+            while startpoint != []:
+                time += 1
+                for i in startpoint:
+                    for j,k in [(i[0]-1,i[1]),(i[0]+1,i[1]),(i[0],i[1]-1),(i[0],i[1]+1)]:
+                        if j>=0 and k>=0 and j< len(forest) and k <=len(forest[0]) and pointdict[(j,k)] == 1:
+                            if (j,k) == end:
+                                return time
+                            newpoint.append((j,k))
+                            pointdict[(j,k)] = 0
+                startpoint = newpoint
+                newpoint = []
+            return -1
+        trees.sort()
+        start = (0,0)
+        index = 0
+        anwser = 0
+        for i in range(len(trees)):
+            end = numberdict[trees[index]]
+            tempanwser = judge(start,end,pointdict)
+            if tempanwser == -1:
+                return -1
+            anwser += tempanwser
+            start = end
+            index += 1
+        return anwser
+    a = cutOffTree(0,[[1,2,3],[0,0,4],[7,6,5]])
+    print(a)
+
+'''
+leetcode 464 我能赢吗
+import functools
+class Solution:
+    def canIWin(self, maxChoosableInteger: int, desiredTotal: int) -> bool:
+        @functools.lru_cache(maxsize = None)
+        def dfs(usedNumbers: int, currentTotal: int) -> bool:
+            for i in range(maxChoosableInteger):
+                if (usedNumbers >> i) & 1 == 0:
+                    if currentTotal + i + 1 >= desiredTotal or not dfs(usedNumbers | (1 << i), currentTotal + i + 1):
+                        return True
+            return False
+
+        return (1 + maxChoosableInteger) * maxChoosableInteger // 2 >= desiredTotal and dfs(0, 0)
+    a = canIWin(0,18,70)
+    print(a)
+'''
+
+
