@@ -856,7 +856,7 @@ class CountIntervals:
 '''
 
 '''
-leetcdoe 巫师的总力量和
+leetcdoe 2281 巫师的总力量和
 
 import bisect
 class Solution:
@@ -897,55 +897,57 @@ class Solution:
 
 '''
 leetcode 675 为高尔夫比赛砍树
-'''
+
 from collections import defaultdict
 class Solution:
     def cutOffTree(self, forest: list[list[int]]) -> int:
+        m = len(forest)
+        n = len(forest[0])
         numberdict = {}
         trees = []
-        pointdict = defaultdict(int)
         for i in range(len(forest)):
             for j in range(len(forest[0])):
                 if forest[i][j] > 1:
                     trees.append(forest[i][j])
                     numberdict[forest[i][j]] = (i,j)
-                    pointdict[(i,j)] = 1
-                elif forest[i][j] == 1:
-                    pointdict[(i,j)] = 1
-        def judge(start,end,pointdict):
+        trees.sort()
+        start = (0,0)
+        index = 0
+        anwser = 0
+        tempanwser = 0
+        def judge(start,end):
             if start == end:
                 return 0
             time = 0
             newpoint = []
             startpoint = [start]
-            pointdict[start] = 0
-            while startpoint != []:
+            visited ={start}
+            while startpoint:
                 time += 1
                 for i in startpoint:
                     for j,k in [(i[0]-1,i[1]),(i[0]+1,i[1]),(i[0],i[1]-1),(i[0],i[1]+1)]:
-                        if j>=0 and k>=0 and j< len(forest) and k <=len(forest[0]) and pointdict[(j,k)] == 1:
+                        if 0<= j < m and 0<=k <n and forest[j][k] >= 1 and (j,k) not in visited:
                             if (j,k) == end:
                                 return time
                             newpoint.append((j,k))
-                            pointdict[(j,k)] = 0
+                            visited.add((j,k))
                 startpoint = newpoint
                 newpoint = []
             return -1
-        trees.sort()
-        start = (0,0)
-        index = 0
-        anwser = 0
         for i in range(len(trees)):
             end = numberdict[trees[index]]
-            tempanwser = judge(start,end,pointdict)
+            tempanwser = judge(start,end)
             if tempanwser == -1:
                 return -1
             anwser += tempanwser
             start = end
             index += 1
         return anwser
-    a = cutOffTree(0,[[1,2,3],[0,0,4],[7,6,5]])
-    print(a)
+A = Solution
+a = A.cutOffTree(A,[[54581641,64080174,24346381,69107959],[86374198,61363882,68783324,79706116],[668150,92178815,89819108,94701471],[83920491,22724204,46281641,47531096],[89078499,18904913,25462145,60813308]])
+print(a)
+'''
+
 
 '''
 leetcode 464 我能赢吗
@@ -965,4 +967,32 @@ class Solution:
     print(a)
 '''
 
+'''
+leetcode 467 环绕字符串中唯一的字符串
 
+class Solution:
+    def findSubstringInWraproundString(self, p: str) -> int: 
+        right = 0
+        allstr = set()
+        strdict = collections.defaultdict(int)
+        anwser = 0
+        for i in range(len(p)):
+            if i <= right and i != 0:
+                allstr.add((p[i],p[right],right-i+1))
+            else:
+                right = i
+                if right == len(p)-1:
+                    allstr.add((p[i],p[i],1))
+                    break
+                while right <len(p) and (ord(p[right+1]) ==  ord(p[right])+1 or (p[right+1]=='a'and p[right]=='z')):
+                    right += 1
+                    if right == len(p)-1:
+                        break
+                allstr.add((p[i],p[right],right-i+1))
+        for i in allstr:
+            if i[2] > strdict[i[0]]:
+                strdict[i[0]] = i[2]
+        for j in strdict:
+            anwser += strdict[j]
+        return anwser
+'''
