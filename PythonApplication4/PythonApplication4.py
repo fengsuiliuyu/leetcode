@@ -978,21 +978,302 @@ class Solution:
         anwser = 0
         for i in range(len(p)):
             if i <= right and i != 0:
-                allstr.add((p[i],p[right],right-i+1))
+                if right-i+1 > strdict[p[i]]:
+                    strdict[p[i]] = right - i + 1
             else:
                 right = i
                 if right == len(p)-1:
-                    allstr.add((p[i],p[i],1))
+                    if 1 > strdict[p[i]]:
+                        strdict[p[i]] = 1
                     break
                 while right <len(p) and (ord(p[right+1]) ==  ord(p[right])+1 or (p[right+1]=='a'and p[right]=='z')):
                     right += 1
                     if right == len(p)-1:
                         break
-                allstr.add((p[i],p[right],right-i+1))
-        for i in allstr:
-            if i[2] > strdict[i[0]]:
-                strdict[i[0]] = i[2]
+                if right-i+1 > strdict[p[i]]:
+                    strdict[p[i]] = right-i+1
         for j in strdict:
             anwser += strdict[j]
         return anwser
+'''
+'''
+from collections import defaultdict
+class BookMyShow:
+    def __init__(self, n: int, m: int):
+        self.allseats = defaultdict(list)
+        self.m = m
+        self.numberdict = defaultdict(int)
+        
+    def gather(self, k: int, maxRow: int) -> list[int]:
+        m = self.m
+        for i in range(0,maxRow+1):
+            if k > m-self.numberdict[i]:
+                continue
+            if self.allseats[i] == []:
+                self.allseats[i].append([0,k-1])
+                self.numberdict[i] += k
+                return [i,0]
+            temp = 0
+            index = 0
+            for j in self.allseats[i]:
+                if j[0] >= temp + k:
+                    self.allseats[i].insert(index,[temp,temp+k-1])
+                    self.numberdict[i] += k
+                    return [i,temp]
+                temp = j[1]+1
+                index += 1
+            if m >= temp + k:
+                self.allseats[i].append([temp,temp+k-1])
+                self.numberdict[i] += k
+                return [i,temp]
+        return []
+    
+    def scatter(self, k: int, maxRow: int) -> bool:
+        m = self.m
+        lenth = 0
+        for i in range(0,maxRow+1):
+            lenth += self.numberdict[i]
+            if (i+1)*m-lenth > k:
+                break
+        if (maxRow+1)*m - lenth <  k:
+            return False
+        for i in range(0,maxRow+1):
+            if k >= m-self.numberdict[i]:
+                k -= m -self.numberdict[i]
+                self.numberdict[i] = m
+            else:
+                if k == 0 :
+                    break
+                temp = 0
+                while self.allseats[i] != [] and k >self.allseats[i][0][0]-temp:
+                    k -= self.allseats[i][0][0]-temp
+                    temp = self.allseats[i][0][1]+1
+                    self.allseats[i].pop(0)
+                if self.allseats[i] == []:
+                    self.allseats[i].append([0,temp + k-1])
+                else:
+                    self.allseats[i].insert(0,[0,temp + k-1])
+                self.numberdict[i] += k
+                k = 0
+                break
+        return True
+a = BookMyShow(18,48)
+print(a.scatter(24,13))
+print(a.scatter(12,5))
+print(a.gather(12,5))
+'''
+
+'''
+class Solution:
+    def totalSteps(self, nums: list[int]) -> int:
+        def judge(s,show):
+            if len(s) <= 1:
+                return show
+            big = s[0]
+            temp = s[0]
+            index = 1
+            news = []
+            for i in s:
+                if i>= temp:
+                    news.append(i)
+                temp = i
+            return judge(news,show+1)
+        start = 0
+        index = 1
+        anwser = 0
+        while index < len(nums):
+            if nums[index] <nums[start]:
+                index += 1
+            else:
+                anwser = max(anwser,judge(nums[start:index],0))
+                start = index
+                index += 1
+        anwser = max(anwser,judge(nums[start:index],0))
+        return anwser
+    a = totalSteps(0,[10,1,2,3,4,5,6,1,2,3])
+    print(a)
+'''
+
+'''
+剑指 Offer II 114. 外星文字典
+
+import collections
+import copy
+class Solution:
+    def alienOrder(self, words: list[str]) -> str:
+        def judge(a,b):
+            m = len(a)
+            n = len(b)
+            i,j = 0,0
+            while i<m and j <n and a[i] == b[j]:
+                i+= 1
+                j += 1
+            if i ==m or j == n:
+                if len(a) > len(b):
+                    return False
+                return None
+            else:
+                return (a[i],b[j])
+        worddictl = collections.defaultdict(list)
+        allword = set()
+        for i in range(len(words)-1):
+            temp = judge(words[i],words[i+1])
+            if temp == False:
+                return ''
+            if temp != None:
+                if temp[0] not in worddictl[temp[1]]:
+                    worddictl[temp[1]].append(temp[0])
+        for i in words:
+            for j in i:
+                allword.add(j)
+            if len(allword) == 26:
+                break
+        def find(worddictl,allword):
+            newallword = copy.deepcopy(allword)
+            for i in worddictl:
+                allword.remove(i)
+            if not allword:
+                return (False,False,False)
+            string = ''.join(list(allword))
+            for i in worddictl:
+                for j in list(allword):
+                    if j in worddictl[i]:
+                        worddictl[i].remove(j)
+            deleteword = []
+            for i in worddictl:
+                if worddictl[i] == []:
+                    deleteword.append(i)
+            for i in deleteword:
+                worddictl.pop(i)
+            for i in list(allword):
+                newallword.remove(i)
+            return (string,worddictl,newallword)
+        allstr = []
+        while allword:
+            string,worddictl,allword = find(worddictl,allword)
+            if string == False:
+                return ''
+            allstr.append(string)
+        return ''.join(allstr)
+    a = alienOrder(0,["ac","ab","zc","zb"])
+    print(a)
+'''
+
+'''
+leetcode 699 掉落的方块
+class Solution:
+    def fallingSquares(self, positions: list[list[int]]) -> list[int]:
+        height = []
+        allheight = []
+        interval= []
+        for i in positions:
+            if not interval:
+                interval.append([i[0],i[0]+i[1]])
+                height = [i[1]]
+                allheight = [i[1]]
+            else:
+                index = 0
+                while index < len(interval) and i[0] >= interval[index][1] :
+                    index += 1
+                if index == len(interval):
+                    allheight.append(i[1])
+                    height.append(max(height[-1],i[1]))
+                    interval.append([i[0],i[0]+i[1]])
+                else:
+                    if i[0] > interval[index][0]:
+                        interval.insert(index,[interval[index][0],i[0]])
+                        allheight.insert(index,allheight[index])
+                        maxheight = allheight[index]
+                        index += 1
+                        while index < len(interval) and (i[0]+i[1]) >= interval[index][1]:
+                            maxheight = max(maxheight,allheight[index])
+                            allheight.pop(index)
+                            interval.pop(index)
+                        if index == len(interval):
+                            allheight.append(maxheight + i[1])
+                            interval.append([i[0],i[0]+i[1]])
+                            height.append(max(height[-1],maxheight+i[1]))
+                        elif (i[0]+i[1]) > interval[index][0]:
+                            maxheight = max(maxheight,allheight[index])
+                            allheight.insert(index,maxheight+i[1])
+                            interval.insert(index,[i[0],i[0]+i[1]])
+                            index += 1
+                            interval[index][0] = i[0]+i[1]
+                            height.append(max(height[-1],maxheight+i[1]))
+                        else:
+                            allheight.insert(index,maxheight+i[1])
+                            interval.insert(index,[i[0],i[0]+i[1]])
+                            height.append(max(height[-1],maxheight+i[1]))
+                    else:
+                        maxheight = 0
+                        while index < len(interval) and (i[0]+i[1]) >= interval[index][1]:
+                            maxheight = max(maxheight,allheight[index])
+                            allheight.pop(index)
+                            interval.pop(index)
+                        if index == len(interval):
+                            allheight.append(maxheight + i[1])
+                            interval.append([i[0],i[0]+i[1]])
+                            height.append(max(height[-1],maxheight+i[1]))
+                        elif (i[0]+i[1]) > interval[index][0]:
+                            maxheight = max(maxheight,allheight[index])
+                            allheight.insert(index,maxheight+i[1])
+                            interval.insert(index,[i[0],i[0]+i[1]])
+                            index += 1
+                            interval[index][0] = i[0]+i[1]
+                            height.append(max(height[-1],maxheight+i[1]))
+                        else:
+                            allheight.insert(index,maxheight+i[1])
+                            interval.insert(index,[i[0],i[0]+i[1]])
+                            height.append(max(height[-1],maxheight+i[1]))
+        return height
+    a = fallingSquares(0,[[7,2],[1,7],[9,5],[1,8],[3,4]])
+    print(a)
+'''
+'''
+leetcode 1368  使网格图至少有一条有效路径的最小代价
+import heapq
+class Solution:
+    def minCost(self, grid: list[list[int]]) -> int:
+        m = len(grid)
+        n = len(grid[0])
+        visited = {(0,0)}
+        newpoint = [(0,0,0)]
+        lenthdict = {}
+        lenthdict[(0,0)] = 0
+        while newpoint:
+            h,i,j = heapq.heappop(newpoint)
+            if (i,j) == (m-1,n-1):
+                return h
+            if grid[i][j] == 1:
+                if j < n-1 and ((i,j+1) not in visited or lenthdict[(i,j+1)] > h):
+                    heapq.heappush(newpoint,(h,i,j+1))
+                    visited.add((i,j+1))
+                    lenthdict[(i,j+1)] = h
+                if (i,j+1) == (m-1,n-1):
+                    return h
+            if grid[i][j] == 2:
+                if j > 0 and ((i,j-1) not in visited or lenthdict[(i,j-1)] > h):
+                    heapq.heappush(newpoint,(h,i,j-1))
+                    visited.add((i,j-1))
+                    lenthdict[(i,j-1)] = h
+            if grid[i][j] == 3:
+                if i < m-1 and ((i+1,j) not in visited or lenthdict[(i+1,j)] > h):
+                    heapq.heappush(newpoint,(h,i+1,j))
+                    visited.add((i+1,j))
+                    lenthdict[(i+1,j)] = h
+                if (i+1,j) == (m-1,n-1):
+                    return h
+            else:
+                if i > 0 and ((i-1,j) not in visited or lenthdict[(i-1,j)] > h):
+                    visited.add((i-1,j))
+                    lenthdict[(i-1,j)] = h
+                    heapq.heappush(newpoint,(h,i-1,j))
+
+            for x,y in ((i-1,j),(i+1,j),(i,j-1),(i,j+1)):
+                if 0<=x<m and 0<=y<n and ((x,y) not in visited or lenthdict[(x,y)] > h+1):
+                    visited.add((x,y))
+                    lenthdict[(x,y)] = h+1
+                    heapq.heappush(newpoint,(h+1,x,y))
+    a = minCost(0,[[1,1,3],[3,2,2],[1,1,4]])
+    print(a)
 '''
